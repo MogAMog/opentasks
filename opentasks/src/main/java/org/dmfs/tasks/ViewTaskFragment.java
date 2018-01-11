@@ -51,11 +51,10 @@ import android.view.animation.AlphaAnimation;
 import android.widget.TextView;
 
 import org.dmfs.android.bolts.color.Color;
-import org.dmfs.android.bolts.color.colors.ValueColor;
+import org.dmfs.android.bolts.color.elementary.ValueColor;
 import org.dmfs.android.retentionmagic.SupportFragment;
 import org.dmfs.android.retentionmagic.annotations.Parameter;
 import org.dmfs.android.retentionmagic.annotations.Retain;
-import org.dmfs.optional.Optional;
 import org.dmfs.tasks.contract.TaskContract.Tasks;
 import org.dmfs.tasks.model.ContentSet;
 import org.dmfs.tasks.model.Model;
@@ -66,7 +65,6 @@ import org.dmfs.tasks.notification.TaskNotificationHandler;
 import org.dmfs.tasks.share.ShareIntentFactory;
 import org.dmfs.tasks.utils.ContentValueMapper;
 import org.dmfs.tasks.utils.OnModelLoadedListener;
-import org.dmfs.tasks.utils.bundle.OptionalColorArg;
 import org.dmfs.tasks.widget.TaskView;
 
 import java.util.Arrays;
@@ -85,7 +83,7 @@ public class ViewTaskFragment extends SupportFragment
         implements OnModelLoadedListener, OnContentChangeListener, OnMenuItemClickListener, OnOffsetChangedListener
 {
     private final static String ARG_URI = "uri";
-    private static final String ARG_COLOR_HINT = "color_hint";
+    private static final String ARG_STARTING_COLOR = "starting_color";
 
     /**
      * A set of values that may affect the recurrence set of a task. If one of these values changes we have to submit all of them.
@@ -198,18 +196,16 @@ public class ViewTaskFragment extends SupportFragment
     /**
      * @param taskContentUri
      *         the content uri of the task to display
-     * @param colorHint
-     *         the optional color hint that can be used for the toolbars (as task color) until it is loaded
+     * @param startingColor
+     *         The color that is used for the toolbars until the actual task color is loaded. If available provide the actual task color, otherwise use the
+     *         primary color.
      */
-    public static ViewTaskFragment newInstance(@NonNull Uri taskContentUri, @NonNull Optional<Color> colorHint)
+    public static ViewTaskFragment newInstance(@NonNull Uri taskContentUri, @NonNull Color startingColor)
     {
         ViewTaskFragment fragment = new ViewTaskFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_URI, taskContentUri);
-        if (colorHint.isPresent())
-        {
-            args.putInt(ARG_COLOR_HINT, colorHint.value().argb());
-        }
+        args.putInt(ARG_STARTING_COLOR, startingColor.argb());
         fragment.setArguments(args);
         return fragment;
     }
@@ -282,13 +278,10 @@ public class ViewTaskFragment extends SupportFragment
         showFloatingActionButton(false);
         mFloatingActionButton.setOnClickListener(v -> completeTask());
 
-        // Update the toolbar color to the hint color until the actual is loaded for the task (used on tablet)
-        Optional<Color> colorHint = new OptionalColorArg(getArguments(), ARG_COLOR_HINT);
-        if (colorHint.isPresent())
-        {
-            mListColor = colorHint.value().argb();
-            updateColor();
-        }
+        // Update the toolbar color until the actual is loaded for the task
+
+        mListColor = new ValueColor(getArguments().getInt(ARG_STARTING_COLOR)).argb();
+        updateColor();
 
         mRestored = savedInstanceState != null;
 

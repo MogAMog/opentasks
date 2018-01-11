@@ -35,19 +35,19 @@ import org.dmfs.tasks.ViewTaskFragment;
 public final class TaskDetailsFragmentSingle implements Single<Fragment>
 {
     private final Optional<Uri> mTaskUri;
-    private final Optional<Color> mColorHint;
+    private final Color mColor;
 
 
     /**
      * @param taskUri
      *         the content uri of the task
-     * @param colorHint
+     * @param color
      *         the color to be used by the created Fragment for the toolbars until the task details load
      */
-    public TaskDetailsFragmentSingle(Optional<Uri> taskUri, Optional<Color> colorHint)
+    public TaskDetailsFragmentSingle(Optional<Uri> taskUri, Color color)
     {
         mTaskUri = taskUri;
-        mColorHint = colorHint;
+        mColor = color;
     }
 
 
@@ -55,7 +55,7 @@ public final class TaskDetailsFragmentSingle implements Single<Fragment>
     public Fragment value()
     {
         return mTaskUri.isPresent() ?
-                ViewTaskFragment.newInstance(mTaskUri.value(), mColorHint)
-                : EmptyTaskFragment.newInstance(mColorHint);
+                ViewTaskFragment.newInstance(mTaskUri.value(), mColor)
+                : EmptyTaskFragment.newInstance(mColor);
     }
 }

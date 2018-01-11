@@ -30,10 +30,9 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import org.dmfs.android.bolts.color.Color;
+import org.dmfs.android.bolts.color.colors.PrimaryColor;
 import org.dmfs.tasks.model.ContentSet;
 import org.dmfs.tasks.utils.BaseActivity;
-
-import static org.dmfs.optional.Absent.absent;
 
 
 /**
@@ -68,7 +67,7 @@ public class ViewTaskActivity extends BaseActivity implements ViewTaskFragment.C
 
         if (savedInstanceState == null)
         {
-            ViewTaskFragment fragment = ViewTaskFragment.newInstance(getIntent().getData(), absent());
+            ViewTaskFragment fragment = ViewTaskFragment.newInstance(getIntent().getData(), new PrimaryColor(this));
             getSupportFragmentManager().beginTransaction().add(R.id.task_detail_container, fragment).commit();
         }
     }

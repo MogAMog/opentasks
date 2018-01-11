@@ -48,10 +48,13 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import org.dmfs.android.bolts.color.Color;
+import org.dmfs.android.bolts.color.colors.PrimaryColor;
+import org.dmfs.android.bolts.color.elementary.DelegatingColor;
+import org.dmfs.android.bolts.color.elementary.SingleColor;
 import org.dmfs.android.retentionmagic.annotations.Retain;
 import org.dmfs.jems.single.Single;
+import org.dmfs.jems.single.combined.Backed;
 import org.dmfs.optional.NullSafe;
-import org.dmfs.optional.Present;
 import org.dmfs.provider.tasks.AuthorityUtil;
 import org.dmfs.tasks.contract.TaskContract.Tasks;
 import org.dmfs.tasks.detailsscreen.TaskDetailsFragmentSingle;
@@ -232,7 +235,7 @@ public class TaskListActivity extends BaseActivity implements TaskListFragment.C
             replaceTaskDetailsFragment(
                     new TaskDetailsFragmentSingle(
                             new NullSafe<>(mSelectedTaskUri),
-                            new OptionalNonTransparentIntColor(mLastUsedColor)));
+                            new LastUsedOrPrimaryColor(mLastUsedColor, this)));
         }
         else
         {
@@ -401,7 +404,7 @@ public class TaskListActivity extends BaseActivity implements TaskListFragment.C
                     mSelectedTaskUri = null;
                     mShouldSwitchToDetail = false;
                 }
-                replaceTaskDetailsFragment(new TaskDetailsFragmentSingle(new NullSafe<>(uri), new Present<>(taskColor)));
+                replaceTaskDetailsFragment(new TaskDetailsFragmentSingle(new NullSafe<>(uri), taskColor));
             }
             else if (forceReload)
             {
@@ -424,7 +427,7 @@ public class TaskListActivity extends BaseActivity implements TaskListFragment.C
         if (mTwoPane)
         {
             mShouldShowDetails = true;
-            replaceTaskDetailsFragment(new TaskDetailsFragmentSingle(absent(), new OptionalNonTransparentIntColor(mLastUsedColor)));
+            replaceTaskDetailsFragment(new TaskDetailsFragmentSingle(absent(), new LastUsedOrPrimaryColor(mLastUsedColor, this)));
         }
     }
 
@@ -541,7 +544,7 @@ public class TaskListActivity extends BaseActivity implements TaskListFragment.C
         if (mTwoPane)
         {
             // empty the detail fragment
-            replaceTaskDetailsFragment(new TaskDetailsFragmentSingle(absent(), new OptionalNonTransparentIntColor(mLastUsedColor)));
+            replaceTaskDetailsFragment(new TaskDetailsFragmentSingle(absent(), new LastUsedOrPrimaryColor(mLastUsedColor, this)));
         }
     }
 
@@ -758,5 +761,15 @@ public class TaskListActivity extends BaseActivity implements TaskListFragment.C
     public boolean isInTransientState()
     {
         return mTransientState;
+    }
+
+
+    private static final class LastUsedOrPrimaryColor extends DelegatingColor
+    {
+
+        public LastUsedOrPrimaryColor(@ColorInt int lastUsedColor, @NonNull Context context)
+        {
+            super(new SingleColor(new Backed<>(new OptionalNonTransparentIntColor(lastUsedColor), new PrimaryColor(context))));
+        }
     }
 }

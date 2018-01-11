@@ -24,10 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.dmfs.android.bolts.color.Color;
-import org.dmfs.android.bolts.color.colors.PrimaryColor;
+import org.dmfs.android.bolts.color.elementary.ValueColor;
 import org.dmfs.android.retentionmagic.SupportFragment;
-import org.dmfs.optional.Optional;
-import org.dmfs.tasks.utils.bundle.OptionalColorArg;
 
 
 /**
@@ -38,25 +36,36 @@ import org.dmfs.tasks.utils.bundle.OptionalColorArg;
  */
 public class EmptyTaskFragment extends SupportFragment
 {
-    private static final String ARG_COLOR_HINT = "color_hint";
+    private static final String ARG_COLOR = "color";
 
     private Color mColor;
 
 
     /**
-     * @param colorHint
-     *         The color that the toolbars should take. If absent, the primary color is used.
+     * @param color
+     *         the color that the toolbars should take
      */
-    public static Fragment newInstance(Optional<Color> colorHint)
+    public static Fragment newInstance(Color color)
     {
         EmptyTaskFragment fragment = new EmptyTaskFragment();
-        if (colorHint.isPresent())
-        {
-            Bundle args = new Bundle();
-            args.putInt(ARG_COLOR_HINT, colorHint.value().argb());
-            fragment.setArguments(args);
-        }
+        Bundle args = new Bundle();
+        args.putInt(ARG_COLOR, color.argb());
+        fragment.setArguments(args);
         return fragment;
+    }
+
+
+    @Override
+    public void onAttach(Activity activity)
+    {
+        super.onAttach(activity);
+
+        mColor = new ValueColor(getArguments().getInt(ARG_COLOR));
+
+        if (activity instanceof ViewTaskFragment.Callback)
+        {
+            ((ViewTaskFragment.Callback) activity).updateColor(mColor);
+        }
     }
 
 
@@ -66,19 +75,5 @@ public class EmptyTaskFragment extends SupportFragment
         View view = inflater.inflate(R.layout.opentasks_fragment_empty_task, container, false);
         view.findViewById(R.id.empty_task_fragment_appbar).setBackgroundColor(mColor.argb());
         return view;
-    }
-
-
-    @Override
-    public void onAttach(Activity activity)
-    {
-        super.onAttach(activity);
-
-        mColor = new OptionalColorArg(getArguments(), ARG_COLOR_HINT).value(new PrimaryColor(getContext()));
-
-        if (activity instanceof ViewTaskFragment.Callback)
-        {
-            ((ViewTaskFragment.Callback) activity).updateColor(mColor);
-        }
     }
 }
